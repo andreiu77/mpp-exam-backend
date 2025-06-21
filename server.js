@@ -52,6 +52,36 @@ app.post("/candidates/thread", (req, res) => {
   }
 });
 
+app.get("/voters", async (req, res) => {
+  const voters = await prisma.voter.findMany();
+  res.json(voters);
+});
+
+// GET /voter/:id
+app.get("/voter/:id", async (req, res) => {
+  const { id } = req.params;
+  const voter = await prisma.voter.findUnique({ where: { id } });
+  if (!voter) return res.status(404).json({ error: "Voter not found" });
+  res.json(voter);
+});
+
+// POST /vote
+app.post("/vote", async (req, res) => {
+  const { voterId, candidateId } = req.body;
+  // Check if voter exists and hasn't voted yet
+  const voter = await prisma.voter.findUnique({ where: { id: voterId } });
+  if (!voter) return res.status(404).json({ error: "Voter not found" });
+  if (voter.voted !== null && voter.voted !== undefined)
+    return res.status(400).json({ error: "You have already voted" });
+
+  // Update the voter
+  await prisma.voter.update({
+    where: { id: voterId },
+    data: { voted: candidateId }
+  });
+  res.json({ success: true });
+});
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
