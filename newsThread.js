@@ -28,4 +28,4 @@ function getNews() {
   return news;
 }
 
-export default { startNewsThread, stopNewsThread, getNews };
+module.exports =  { startNewsThread, stopNewsThread, getNews };
