@@ -5,6 +5,8 @@ const prisma = new PrismaClient();
 const authRouter = require("./auth");
 const { getCandidates, setCandidates, pushCandidate } = require("./candidatesStore");
 const { startThread, stopThread } = require("./thread");
+const { startNewsThread, stopNewsThread, getNews } = require("./newsThread");
+
 
 const app = express();
 app.use(cors());
@@ -82,6 +84,25 @@ app.post("/vote", async (req, res) => {
     data: { voted: candidateId }
   });
   res.json({ success: true });
+});
+
+// Start/stop news thread
+app.post("/news/thread", (req, res) => {
+  const { action } = req.body;
+  if (action === "start") {
+    startNewsThread();
+    res.json({ started: true });
+  } else if (action === "stop") {
+    stopNewsThread();
+    res.json({ stopped: true });
+  } else {
+    res.json({ running: !!getNews().length });
+  }
+});
+
+// Get news
+app.get("/news", (req, res) => {
+  res.json(getNews());
 });
 
 const PORT = process.env.PORT || 4000;
