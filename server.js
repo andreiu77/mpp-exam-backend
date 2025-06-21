@@ -101,8 +101,9 @@ app.post("/news/thread", (req, res) => {
 });
 
 // Get news
-app.get("/news", (req, res) => {
-  res.json(getNews());
+app.get("/news", async (req, res) => {
+  const news = await getNews();
+  res.json(news);
 });
 
 let tur1Running = false;

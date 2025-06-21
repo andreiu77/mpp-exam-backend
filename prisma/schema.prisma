@@ -11,3 +11,10 @@ model Voter {
   id        String     @id
   voted     Int?    // candidate id, nullable if not voted
 }
+
+model News {
+  id        String   @id
+  title     String
+  content   String
+  createdAt DateTime
+}
