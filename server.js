@@ -1,11 +1,13 @@
 const express = require("express");
 const cors = require("cors");
+const authRouter = require("./auth");
 const { getCandidates, setCandidates, pushCandidate } = require("./candidatesStore");
 const { startThread, stopThread } = require("./thread");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use("/auth", authRouter);
 
 // GET all candidates
 app.get("/candidates", (req, res) => {
@@ -50,7 +52,7 @@ app.post("/candidates/thread", (req, res) => {
   }
 });
 
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
 });
