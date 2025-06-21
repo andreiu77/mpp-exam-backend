@@ -105,6 +105,45 @@ app.get("/news", (req, res) => {
   res.json(getNews());
 });
 
+let tur1Running = false;
+let tur1Interval = null;
+const { startTur1Thread, stopTur1Thread, isTur1Running } = require("./tur1Thread");
+
+// Start/stop tur1 thread
+app.post("/tur1/thread", (req, res) => {
+  const { action } = req.body;
+  if (action === "start" && !isTur1Running()) {
+    startTur1Thread();
+    return res.json({ started: true });
+  }
+  if (action === "stop" && isTur1Running()) {
+    stopTur1Thread();
+    return res.json({ stopped: true });
+  }
+  res.json({ running: isTur1Running() });
+});
+
+// Get tur1 results
+app.get("/tur1/results", async (req, res) => {
+  const candidates = getCandidates();
+  // Get all voters
+  const voters = await prisma.voter.findMany();
+  // Count votes per candidate
+  const counts = {};
+  candidates.forEach(c => counts[c.id] = 0);
+  voters.forEach(v => {
+    if (v.voted !== null && counts[v.voted] !== undefined) counts[v.voted]++;
+  });
+  const results = candidates.map(c => ({
+    id: c.id,
+    name: c.name,
+    party: c.party,
+    votes: counts[c.id]
+  }));
+  results.sort((a, b) => b.votes - a.votes);
+  res.json(results);
+});
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
